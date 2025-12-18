@@ -79,6 +79,50 @@ ChronoSweep does not run as a daemon; schedule it with your preferred tool:
 - macOS/Linux cron: `0 * * * * /usr/bin/python /path/to/run_cleanup.py --config /path/to/config.yaml >> /tmp/chrono_sweep.log 2>&1`
 - systemd timers, launchd jobs, or any CI/automation runner also work.
 
+### launchd setup (macOS)
+Example config we use for hourly runs:
+- Plist path: `~/Library/LaunchAgents/com.chronosweep.cleanup.plist`
+- Label: `com.chronosweep.cleanup`
+- Schedule: top of every hour (`StartCalendarInterval` Minute=0)
+- Command: `/Users/alexblack/Projects/Scripts & Other/FolderCleaner/.venv/bin/python /Users/alexblack/Projects/Scripts & Other/FolderCleaner/run_cleanup.py --config /Users/alexblack/Projects/Scripts & Other/FolderCleaner/config.yaml --alerts --alert-window-days 3`
+- Environment: PATH set to `/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin`
+- Logs: stdout -> `/tmp/chronosweep.log`, stderr -> `/tmp/chronosweep.err`
+
+Plist contents:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.chronosweep.cleanup</string>
+  <key>StartCalendarInterval</key><dict><key>Minute</key><integer>0</integer></dict>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/alexblack/Projects/Scripts &amp; Other/FolderCleaner/.venv/bin/python</string>
+    <string>/Users/alexblack/Projects/Scripts &amp; Other/FolderCleaner/run_cleanup.py</string>
+    <string>--config</string>
+    <string>/Users/alexblack/Projects/Scripts &amp; Other/FolderCleaner/config.yaml</string>
+    <string>--alerts</string>
+    <string>--alert-window-days</string>
+    <string>3</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string></dict>
+  <key>StandardOutPath</key><string>/tmp/chronosweep.log</string>
+  <key>StandardErrorPath</key><string>/tmp/chronosweep.err</string>
+  <key>RunAtLoad</key><true/>
+</dict>
+</plist>
+```
+
+Manage it:
+- Load: `launchctl load ~/Library/LaunchAgents/com.chronosweep.cleanup.plist`
+- Start now: `launchctl start com.chronosweep.cleanup`
+- Check: `launchctl list | grep chronosweep`
+- Logs: `tail -f /tmp/chronosweep.log /tmp/chronosweep.err`
+- Update plist: edit, then `launchctl unload ...` and `launchctl load ...`
+Notes: Using the venv interpreter ensures PyYAML and dependencies are available. If you move the repo or venv, update the paths above.
+
 ## Extending notifications
 Notifications are pluggable via `NotificationOutlet`. The console outlet is the default. To wire a custom outlet (e.g., Slack, email), implement `send(alerts_by_date)` and pass it via `build_service_from_config` (see `folder_cleaner/config.py`).
 
