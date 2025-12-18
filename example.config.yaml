@@ -1,0 +1,27 @@
+trash_dir: "~/.folder_cleaner_trash"
+notifications:
+  - type: console
+  - type: macos
+    options:
+      title: "ChronoSweep"
+      subtitle: "Folder cleanup"
+
+rules:
+  - path: "~/Downloads"
+    retention_time: "6h"
+    notify_before:
+      - "1h"
+    action: system_trash
+    patterns:
+      - pattern: "^ScreenShot"
+        retention_time: "2h"
+        notify_before:
+          - "30m"
+  - path: "~/Desktop"
+    retention_time: "24h"
+    notify_before:
+      - "4h"
+    action: trash
+    exemptions:
+      - "Keep me.txt"
+      - "do-not-touch/"

@@ -1,0 +1,14 @@
+# Bytecode / caches
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+
+# macOS metadata
+.DS_Store
+
+# Local config (keep secrets/paths out of git)
+config.yaml
+
+/.idea
