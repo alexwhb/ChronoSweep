@@ -121,9 +121,9 @@ class MacOSNotificationOutlet:
 
         for alert_date, alerts in sorted(alerts_by_date.items()):
             for alert in alerts:
-                files_display = ", ".join(str(path) for path in alert.files)
-                suffix = "today" if alert.days_until_deletion == 0 else f"in {alert.days_until_deletion} days"
-                message = f"{alert.folder}: {files_display} ({suffix})"
+                count = len(alert.files)
+                suffix = self._format_time_left(alert.days_until_deletion)
+                message = f"{alert.folder}: {count} item{'s' if count != 1 else ''} {suffix}"
 
                 notification_subtitle = self.subtitle or f"Due {alert_date.isoformat()}"
                 script = self._build_script(message, notification_subtitle)
@@ -147,6 +147,14 @@ class MacOSNotificationOutlet:
         import subprocess
 
         subprocess.run(cmd, check=False)
+
+    @staticmethod
+    def _format_time_left(days_until_deletion: int) -> str:
+        if days_until_deletion <= 0:
+            return "today"
+        if days_until_deletion == 1:
+            return "in 1 day"
+        return f"in {days_until_deletion} days"
 
 
 class FolderCleanerService:

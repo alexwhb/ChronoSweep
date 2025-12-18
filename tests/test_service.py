@@ -216,7 +216,7 @@ class FolderCleanerServiceTests(unittest.TestCase):
             )
 
             alerts = service.upcoming_alerts(as_of=base_dt, window_days=0)
-            self.assertIn(base_dt.date(), alerts)
+        self.assertIn(base_dt.date(), alerts)
 
     def test_macos_outlet_formats_commands(self) -> None:
         commands: list[list[str]] = []
@@ -249,6 +249,7 @@ class FolderCleanerServiceTests(unittest.TestCase):
         script = commands[0][2]
         self.assertIn("TestTitle", script)
         self.assertIn("Glass", script)
+        self.assertIn("2 items", script)
 
 if __name__ == "__main__":
     unittest.main()
